@@ -138,7 +138,7 @@ That keeps your source clean and avoids the usual PDF parsing pain.
 name: "Sai Krishna Kishore Beathanabhotla"
 contact:
   location: "Toronto, Ontario"
-  email: "beathanabhotla.kishore@gmail.com"
+  email: "XXXXX@gmail.com"
   linkedin: "https://linkedin.com/in/saikrishnakishore"
 
 sections:
@@ -158,9 +158,9 @@ sections:
     type: "experience"
     jobs:
       - role: "Staff Data Scientist"
-        company: "SurveyMonkey"
+        company: "XXXXX"
         location: "Toronto, ON"
-        dates: "01/2024 - Present"
+        dates: "XX/XXXX - Present"
         bullets:
           - "Built and deployed..."
         tech_stack: "Python, AWS, PyTorch, ..."
