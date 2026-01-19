@@ -1,4 +1,4 @@
-from make_resume import build_resume
+from app.make_resume import build_resume
 
 
 def generate_pdf(aligned_resume: dict, output_path: str):
