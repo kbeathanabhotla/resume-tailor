@@ -1,0 +1,54 @@
+name: "Sai Krishna Kishore Beathanabhotla"
+contact:
+  location: "Toronto, Ontario"
+  email: "beathanabhotla.kishore@gmail.com"
+  linkedin: "https://linkedin.com/in/saikrishnakishore"
+
+sections:
+  - title: "Summary"
+    type: "bullets"
+    items:
+      - "Staff Data Scientist with 13+ years of experience leading end-to-end ML initiatives spanning NLP, forecasting, recommender systems, and applied research."
+      - "Expert in both <b>classical ML</b> (regression, XGBoost, time-series, causal inference) and <b>Generative AI</b> (LLMs, RAGs, multi-agent orchestration, PEFT fine-tuning)."
+      - "Proven ability to <b>translate research into production</b>, delivering scalable AI systems that reduce latency, cost, and manual workload."
+      - "Recognized for <b>mentoring and developing data science teams</b>, establishing org-wide best practices in evaluation, MLOps, and Responsible AI."
+      - "Skilled at <b>aligning ML strategy with product and business goals</b>, driving measurable impact through experimentation, automation, and customer insights."
+
+  - title: "Core Competencies"
+    type: "core_competencies"
+    blocks:
+      - label: "Classical Machine Learning & Statistics:"
+        text: "Regression | Classification | Forecasting | Causal Inference | XGBoost | LightGBM | ARIMA | Clustering | Feature Engineering | Model Evaluation | A/B Testing"
+      - label: "Generative AI & NLP:"
+        text: "LLM Fine-tuning (LoRA/QLoRA/PEFT) | RAG | Prompt Engineering | Multi-Agent Systems | Transformers | RLHF | Summarization | Semantic Search | Topic Modelling"
+      - label: "MLOps & Leadership:"
+        text: "AWS SageMaker | PyTorch | MLFlow | CI/CD | Model Distillation | Drift & Bias Monitoring | Kubernetes | VectorDBs (FAISS, Pinecone) | Weights & Biases | Mentoring | Roadmap Definition | Cross-Functional Collaboration"
+
+  - title: "Education"
+    type: "education"
+    items:
+      - "M.Tech, Data Analytics, BITS Pilani, Pilani, India (2016-2018) with a GPA of 3.7"
+      - "B.Tech, Electronics & Communication Engg, JNTU Hyderabad, India (2008-2012) with GPA of 3.3"
+
+  - title: "Selected Achievements"
+    type: "bullets"
+    items:
+      - "<b>Developed and deployed supervised fine-tuned and distilled LLMs</b> for abuse detection, cutting inference latency by 65% while preserving model precision (F1 &gt; 0.92)."
+      - "<b>Architected and launched survey-theming and feedback-analysis platform</b> using Claude 3.5 models that automated tagging for 10M+ monthly responses, improving response categorization accuracy by 38%."
+
+  - title: "Professional Experience"
+    type: "experience"
+    jobs:
+      - role: "Staff Data Scientist"
+        company: "SurveyMonkey"
+        location: "Toronto, ON"
+        dates: "01/2024 - Present"
+        bullets:
+          - "Delivered an <b>Abuse Detection system</b> using finetuned LLMs and model distillation, reducing inference latency by 65% and infra cost by 50% while maintaining F1 &gt; 0.92."
+          - "Built a survey <b>feedback analysis engine</b> generating auto-themed tags for open-ended responses across <b>10M+ monthly submissions</b>, accelerating insights for CX and product teams."
+          - "Introduced a <b>LLM safety evaluation stack</b> (Garak, Vigil-LLM, NeMo Guardrails) detecting hallucinations and prompt injections; adopted across 4 internal AI projects."
+          - "Designed and deployed a <b>differential privacy framework</b> for automated detection and masking of PII, ensuring full GDPR, HIPAA, and CCPA compliance across all AI pipelines."
+          - "<b>Instituted company-wide evaluation framework</b> for ML model quality, reproducibility, and drift detection."
+          - "Trained/mentored 7 data scientists in applied evaluation, monitoring, finetuning, and model distillation."
+          - "<b>Deployed models on SageMaker</b> with automated CI/CD and experiment tracking through MLFlow."
+        tech_stack: "Python, PyTorch, AWS Bedrock, Model Distillation, LangChain, RAGs, AI Agents, MCP servers"

@@ -13,6 +13,17 @@ Tailor a resume to a specific job posting link and export a **new PDF** in a con
 
 ---
 
+## Features
+
+✅ **Clean LLM Integration** — Unified Ollama client with proper error handling  
+✅ **Configuration via Environment** — Set `OLLAMA_BASE_URL` and `OLLAMA_MODEL`  
+✅ **Command-line Overrides** — Override config with `--ollama-url` and `--ollama-model`  
+✅ **JSON Format Enforcement** — Uses Ollama's native JSON mode for reliable parsing  
+✅ **Comprehensive Diffs** — Both markdown and unified patch formats  
+✅ **ATS Scoring** — LLM-based alignment scoring with confidence metrics  
+
+---
+
 ## Repo layout
 
 ```
@@ -20,15 +31,17 @@ resume-tailor/
 ├── app/
 │   ├── scrape.py          # Scrape job description from a URL
 │   ├── align.py           # Resume ↔ JD alignment (Ollama)
+│   ├── ollama_client.py   # Unified Ollama client with config
 │   ├── schema.py          # Pydantic schema for resume structure
 │   ├── render_text.py     # Resume -> normalized text (for scoring/diff)
-│   ├── score.py           # Alignment score (TF-IDF cosine similarity)
+│   ├── score.py           # Alignment score (LLM-based)
 │   ├── diff.py            # Diff generation (markdown + unified patch)
 │   ├── pdf.py             # PDF rendering wrapper
-|   ├── make_resume.py     # Styled PDF generator (ReportLab)
+│   ├── make_resume.py     # Styled PDF generator (ReportLab)
 │   └── pipeline.py        # End-to-end orchestration
 ├── prompts/
-│   └── resume_align.txt   # Alignment instructions/prompt
+│   ├── resume_align.txt   # Alignment instructions/prompt
+│   └── ats_score.txt      # ATS scoring prompt
 ├── tools/
 │   └── pdf_to_yaml.py     # Convert an existing resume PDF -> YAML
 ├── examples/
@@ -64,7 +77,18 @@ ollama pull kimi-k2-thinking:cloud
 # Ollama should be running on http://localhost:11434
 ```
 
-### 3) Run the pipeline
+### 3) Configure (optional)
+
+Set environment variables for default configuration:
+
+```bash
+export OLLAMA_BASE_URL="http://localhost:11434"
+export OLLAMA_MODEL="kimi-k2-thinking:cloud"
+```
+
+Or use command-line flags to override (see below).
+
+### 4) Run the pipeline
 
 ```bash
 python main.py \
@@ -76,10 +100,15 @@ python main.py \
   --score-json score.json
 ```
 
-Outputs:
+**Optional flags:**
+
+* `--ollama-url` — Override Ollama base URL
+* `--ollama-model` — Override Ollama model name
+
+**Outputs:**
 
 * `tailored_resume.pdf` — the tailored resume
-* `score.json` — alignment score details (0–100 + cosine)
+* `score.json` — alignment score details (0–100 + confidence)
 * `diff.md` — human-friendly diff grouped by section/job
 * `diff.patch` — unified diff (git-style) of normalized text
 
@@ -88,7 +117,7 @@ Outputs:
 ## Recommended workflow
 
 1. **Convert your existing PDF once** → YAML
-2. Maintain the YAML as your “master resume”
+2. Maintain the YAML as your "master resume"
 3. For each job: `YAML + job URL → tailored PDF`
 
 That keeps your source clean and avoids the usual PDF parsing pain.
@@ -96,7 +125,7 @@ That keeps your source clean and avoids the usual PDF parsing pain.
 ### Notes / limitations (PDF import)
 
 * Works best for PDFs with clear ALL-CAPS section headers and the same structure as the generated template.
-* PDFs are not a friendly “source format” — text extraction can lose bullets, spacing, and ordering.
+* PDFs are not a friendly "source format" — text extraction can lose bullets, spacing, and ordering.
 * If something parses weirdly, fix the YAML once, then use YAML as your source of truth going forward.
 
 ---
@@ -139,7 +168,7 @@ sections:
 
 Notes:
 
-* You can use limited HTML inside strings (e.g., `<b>bold</b>`, `<u>underline</u>`, `<br/>`) because ReportLab’s `Paragraph` supports a small HTML subset.
+* You can use limited HTML inside strings (e.g., `<b>bold</b>`, `<u>underline</u>`, `<br/>`) because ReportLab's `Paragraph` supports a small HTML subset.
 * Keep content truthful. The aligner will rewrite/re-rank but should not invent.
 
 ---
@@ -161,13 +190,19 @@ The prompt enforces constraints like:
 * Reorder bullets by relevance
 * Keep bullet count sane per role
 
+The system uses:
+* **Unified OllamaClient** — Single client class for all LLM calls
+* **JSON mode enforcement** — Native Ollama JSON format for reliable parsing
+* **Proper error handling** — Graceful failures with informative messages
+* **Configurable defaults** — Environment variables or CLI flags
+
 ### Step 3: Alignment score
 
-`app/score.py` computes an alignment score between the **job description** and the **tailored resume** using TF-IDF cosine similarity.
+`app/score.py` computes an alignment score between the **job description** and the **tailored resume** using LLM analysis.
 
 Output:
 
-* `score.json` with `{ "score_0_100": ..., "cosine": ... }`
+* `score.json` with `{ "ats_score": 0-100, "confidence": 0-100, ... }`
 
 ### Step 4: Diff (what changed)
 
@@ -182,6 +217,56 @@ Output:
 
 ---
 
+## Configuration options
+
+### Environment variables
+
+```bash
+OLLAMA_BASE_URL    # Default: http://localhost:11434
+OLLAMA_MODEL       # Default: kimi-k2-thinking:cloud
+```
+
+### Command-line flags
+
+```bash
+--ollama-url URL          # Override Ollama base URL
+--ollama-model MODEL      # Override model name
+--resume PATH             # Path to base resume YAML
+--job-url URL             # Job posting URL
+--out PATH                # Output PDF path
+--diff-md PATH            # Markdown diff output
+--diff-patch PATH         # Unified diff output
+--score-json PATH         # ATS score JSON output
+```
+
+### Ollama model selection
+
+Pick a model that can reliably return valid JSON. Examples:
+
+```bash
+ollama pull kimi-k2-thinking:cloud
+ollama pull llama3.3
+ollama pull qwen2.5
+ollama pull mistral
+```
+
+Then configure:
+
+```bash
+export OLLAMA_MODEL="llama3.3"
+# or
+python main.py --ollama-model llama3.3 ...
+```
+
+### Prompt customization
+
+Edit prompts in `prompts/` to change:
+
+* `resume_align.txt` — Tone, strictness, output length for resume tailoring
+* `ats_score.txt` — Scoring criteria and analysis depth
+
+---
+
 ## LinkedIn URLs (important)
 
 LinkedIn often blocks scraping from non-authenticated clients or rate-limits aggressively.
@@ -190,27 +275,9 @@ If a LinkedIn link fails:
 
 * Use a public JD link from the company site (usually easiest), or
 * Add a Playwright-based scraper (headless browser), or
-* Add a “paste JD text” mode (future enhancement)
+* Add a "paste JD text" mode (future enhancement)
 
 This repo is structured so you can swap the scraping layer without touching alignment, scoring, diffing, or PDF rendering.
-
----
-
-## Configuration
-
-### Ollama model
-
-The Ollama model is configured in `app/align.py`. Pick a model that can reliably return valid JSON.
-
-Example:
-
-```bash
-ollama pull kimi-k2-thinking:cloud
-```
-
-### Prompt
-
-Edit `prompts/resume_align.txt` to change tone, strictness, output length, etc.
 
 ---
 
@@ -226,12 +293,13 @@ python tools/pdf_to_yaml.py --pdf path/to/resume.pdf --out resume.yaml
 
 ## Roadmap ideas
 
-* “Paste JD text” input mode (no scraping)
+* "Paste JD text" input mode (no scraping)
 * Better LinkedIn scraping via Playwright
 * Embedding-based match score + skill coverage breakdown
 * Multi-target batch mode: one resume → N tailored PDFs
 * Cover letter generator using the same JD
 * FastAPI web app wrapper
+* Support for multiple LLM providers (OpenAI, Anthropic, etc.)
 
 ---
 

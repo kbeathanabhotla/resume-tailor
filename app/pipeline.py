@@ -7,6 +7,7 @@ from app.align import align_resume
 from app.pdf import generate_pdf
 from app.score import compute_ats_score_llm
 from app.diff import make_diff_markdown, make_unified_diff
+from app.ollama_client import OllamaClient
 
 
 def run_pipeline(
@@ -16,19 +17,37 @@ def run_pipeline(
     diff_md_out: Optional[str] = None,
     diff_patch_out: Optional[str] = None,
     score_out: Optional[str] = None,
+    ollama_client: Optional[OllamaClient] = None,
 ) -> Dict[str, Any]:
+    """
+    Run the full resume tailoring pipeline.
+    
+    Args:
+        base_resume: Base resume dictionary
+        job_url: Job posting URL to scrape
+        output_pdf: Output path for tailored resume PDF
+        diff_md_out: Optional output path for markdown diff
+        diff_patch_out: Optional output path for unified diff patch
+        score_out: Optional output path for ATS score JSON
+        ollama_client: Optional OllamaClient instance (creates default if None)
+    
+    Returns:
+        Dictionary with tailored_resume, diff_md, and diff_patch
+    """
+    if ollama_client is None:
+        ollama_client = OllamaClient()
+    
     print("Scraping job description...")
     jd = scrape_job_description(job_url)
 
     print("Aligning resume...")
-    tailored = align_resume(base_resume, jd)
+    tailored = align_resume(base_resume, jd, client=ollama_client)
 
     print("Scoring ATS match (LLM)...")
     ats = compute_ats_score_llm(
         job_description=jd,
         tailored_resume=tailored,
-        model="kimi-k2-thinking:cloud",
-        ollama_base_url="http://localhost:11434",
+        client=ollama_client,
     )
 
     if score_out:
@@ -57,4 +76,5 @@ def run_pipeline(
         "tailored_resume": tailored,
         "diff_md": diff_md,
         "diff_patch": diff_patch,
+        "ats_score": ats,
     }
